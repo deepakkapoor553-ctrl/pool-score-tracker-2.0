@@ -1,0 +1,970 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>🎱 8-Ball Pool – Score Tracker</title>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #0b0e12;
+            color: #e8edf2;
+            min-height: 100vh;
+            padding: 12px;
+        }
+        ::-webkit-scrollbar {
+            width: 4px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #1a1f26;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #2e7d5e;
+            border-radius: 4px;
+        }
+        .app-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        /* ─── HEADER ─── */
+        .header {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 18px;
+            background: linear-gradient(145deg, #1a212a, #11161e);
+            border-radius: 14px;
+            border: 1px solid #2a3340;
+            margin-bottom: 16px;
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.5);
+        }
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .header-left .logo {
+            font-size: 1.8rem;
+            line-height: 1;
+        }
+        .header-left h1 {
+            font-size: 1.3rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #6fcf97, #27ae60);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .header-left .sub {
+            font-size: 0.7rem;
+            color: #8896a8;
+            -webkit-text-fill-color: #8896a8;
+        }
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .btn-reset {
+            background: #2a1f2a;
+            border: 1px solid #4a2f3a;
+            color: #d4a0b0;
+            padding: 6px 14px;
+            border-radius: 30px;
+            font-weight: 600;
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .btn-reset:hover {
+            background: #3d2835;
+            border-color: #b05a7a;
+            color: #f0c8d8;
+        }
+
+        /* ─── STATS ROW ─── */
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+        @media (max-width: 480px) {
+            .stats-row {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        .stat-card {
+            background: #161e27;
+            border: 1px solid #25303e;
+            border-radius: 12px;
+            padding: 10px 12px;
+            text-align: center;
+            transition: 0.2s;
+        }
+        .stat-card:hover {
+            border-color: #2e7d5e;
+        }
+        .stat-card .stat-number {
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: #6fcf97;
+            line-height: 1.2;
+        }
+        .stat-card .stat-label {
+            font-size: 0.65rem;
+            color: #8896a8;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+        .stat-card .stat-number.negative {
+            color: #e67e7e;
+        }
+
+        /* ─── ADD PLAYER ─── */
+        .add-section {
+            background: #161e27;
+            border: 1px solid #25303e;
+            border-radius: 14px;
+            padding: 14px 16px;
+            margin-bottom: 16px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        .add-section input {
+            flex: 1;
+            min-width: 120px;
+            background: #0f141c;
+            border: 1px solid #25303e;
+            border-radius: 30px;
+            padding: 10px 16px;
+            color: #e8edf2;
+            font-size: 0.95rem;
+            outline: none;
+            transition: 0.2s;
+        }
+        .add-section input:focus {
+            border-color: #2e7d5e;
+        }
+        .add-section input::placeholder {
+            color: #4a5a6a;
+        }
+        .btn-primary {
+            background: #1e7a5a;
+            border: none;
+            color: #fff;
+            padding: 10px 22px;
+            border-radius: 30px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9rem;
+            white-space: nowrap;
+        }
+        .btn-primary:hover {
+            background: #269f76;
+            transform: scale(1.02);
+        }
+        .btn-primary:active {
+            transform: scale(0.97);
+        }
+
+        /* ─── PLAYER CARDS ─── */
+        .player-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 16px;
+            max-height: 60vh;
+            overflow-y: auto;
+            padding-right: 2px;
+        }
+        .player-card {
+            background: #131b24;
+            border: 1px solid #1f2a36;
+            border-radius: 14px;
+            padding: 12px 14px;
+            transition: 0.2s;
+        }
+        .player-card:hover {
+            border-color: #2e7d5e;
+        }
+        .player-card .top-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-bottom: 8px;
+        }
+        .player-card .name-wrap {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .player-card .avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: #1e2a36;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.85rem;
+            color: #6fcf97;
+            flex-shrink: 0;
+        }
+        .player-card .pname {
+            font-weight: 600;
+            font-size: 1rem;
+        }
+        .player-card .pscore {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #f1c40f;
+            min-width: 50px;
+            text-align: right;
+            padding: 0 6px;
+        }
+        .player-card .pscore.negative {
+            color: #e67e7e;
+        }
+        .player-card .btn-del {
+            background: transparent;
+            border: none;
+            color: #4a5a6a;
+            font-size: 0.9rem;
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: 6px;
+            transition: 0.2s;
+        }
+        .player-card .btn-del:hover {
+            color: #e74c3c;
+            background: #2a1820;
+        }
+
+        /* ─── SCORE BUTTONS ─── */
+        .btn-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            align-items: center;
+            margin-top: 2px;
+        }
+        .btn-row .label {
+            font-size: 0.7rem;
+            color: #4a5a6a;
+            font-weight: 600;
+            margin-right: 4px;
+        }
+        .btn-row button {
+            background: #1a212a;
+            border: 1px solid #2a3340;
+            color: #c8d0d8;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.15s;
+            min-width: 38px;
+            flex: 1 0 auto;
+            max-width: 60px;
+            touch-action: manipulation;
+        }
+        .btn-row button:active {
+            transform: scale(0.92);
+        }
+        .btn-row .inc {
+            color: #6fcf97;
+        }
+        .btn-row .inc:hover {
+            background: #1a2e24;
+            border-color: #2e7d5e;
+        }
+        .btn-row .dec {
+            color: #e67e7e;
+        }
+        .btn-row .dec:hover {
+            background: #2e1a1a;
+            border-color: #b05a5a;
+        }
+        .btn-row .big {
+            font-size: 0.9rem;
+            padding: 6px 10px;
+            min-width: 48px;
+        }
+        .btn-row .big.inc {
+            color: #7ddfa0;
+        }
+        .btn-row .big.dec {
+            color: #f1948a;
+        }
+
+        /* ─── STANDINGS ─── */
+        .standings-card {
+            background: #161e27;
+            border: 1px solid #25303e;
+            border-radius: 14px;
+            padding: 14px 16px;
+        }
+        .standings-card .card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+        .standings-card .card-header h2 {
+            font-size: 1rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #d8e2ee;
+        }
+        .standings-card .card-header h2 i {
+            color: #2e7d5e;
+        }
+        .standings-card .card-header .badge {
+            background: #1e2a36;
+            padding: 3px 12px;
+            border-radius: 30px;
+            font-size: 0.7rem;
+            color: #b0c0d0;
+            border: 1px solid #2e3a48;
+        }
+        .standings-wrap {
+            overflow-x: auto;
+        }
+        .standings-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+        }
+        .standings-table th {
+            text-align: left;
+            padding: 8px 10px;
+            color: #8896a8;
+            font-weight: 600;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 2px solid #1f2a36;
+        }
+        .standings-table td {
+            padding: 8px 10px;
+            border-bottom: 1px solid #1a212a;
+        }
+        .standings-table tr:hover td {
+            background: #10171f;
+        }
+        .standings-table .rank {
+            font-weight: 700;
+            color: #6fcf97;
+            width: 30px;
+        }
+        .standings-table .pname {
+            font-weight: 500;
+        }
+        .standings-table .pscore {
+            font-weight: 700;
+            color: #f1c40f;
+        }
+        .standings-table .pscore.negative {
+            color: #e67e7e;
+        }
+        .no-data {
+            text-align: center;
+            color: #4a5a6a;
+            padding: 20px 0;
+            font-style: italic;
+        }
+
+        /* ─── TOAST ─── */
+        .toast-container {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 999;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            align-items: center;
+            pointer-events: none;
+            width: 90%;
+            max-width: 400px;
+        }
+        .toast {
+            background: #1e2732;
+            border: 1px solid #2e3a48;
+            border-left: 4px solid #2e7d5e;
+            padding: 12px 18px;
+            border-radius: 12px;
+            color: #e8edf2;
+            font-size: 0.85rem;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
+            animation: slideUp 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            width: 100%;
+            pointer-events: auto;
+        }
+        .toast.error {
+            border-left-color: #e74c3c;
+        }
+        .toast.success {
+            border-left-color: #2e7d5e;
+        }
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* ─── EMPTY STATE ─── */
+        .empty-state {
+            text-align: center;
+            padding: 24px 10px;
+            color: #4a5a6a;
+        }
+        .empty-state i {
+            font-size: 2rem;
+            color: #1f2a36;
+            margin-bottom: 6px;
+        }
+        .empty-state p {
+            font-size: 0.85rem;
+        }
+
+        /* ─── RESPONSIVE TWEAKS ─── */
+        @media (max-width: 600px) {
+            .header {
+                padding: 10px 14px;
+            }
+            .header-left h1 {
+                font-size: 1.1rem;
+            }
+            .header-left .logo {
+                font-size: 1.5rem;
+            }
+            .player-card .pscore {
+                font-size: 1.4rem;
+                min-width: 40px;
+            }
+            .btn-row button {
+                font-size: 0.7rem;
+                padding: 5px 8px;
+                min-width: 32px;
+                max-width: 48px;
+            }
+            .btn-row .big {
+                font-size: 0.8rem;
+                min-width: 40px;
+            }
+            .stat-card .stat-number {
+                font-size: 1.3rem;
+            }
+            .add-section {
+                padding: 10px 12px;
+            }
+            .add-section input {
+                padding: 8px 14px;
+                font-size: 0.85rem;
+            }
+            .btn-primary {
+                padding: 8px 16px;
+                font-size: 0.8rem;
+            }
+            .standings-card {
+                padding: 10px 12px;
+            }
+            .standings-table {
+                font-size: 0.75rem;
+            }
+            .standings-table th,
+            .standings-table td {
+                padding: 5px 8px;
+            }
+        }
+        @media (max-width: 400px) {
+            .btn-row button {
+                font-size: 0.65rem;
+                padding: 4px 6px;
+                min-width: 28px;
+                max-width: 40px;
+            }
+            .btn-row .big {
+                font-size: 0.75rem;
+                min-width: 34px;
+            }
+            .player-card .pscore {
+                font-size: 1.2rem;
+                min-width: 32px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-container" id="app">
+        <!-- HEADER -->
+        <header class="header">
+            <div class="header-left">
+                <span class="logo">🎱</span>
+                <h1>Pool Race <span class="sub">Score</span></h1>
+            </div>
+            <div class="header-right">
+                <button class="btn-reset" id="resetBtn">
+                    <i class="fas fa-rotate-left"></i> Reset
+                </button>
+            </div>
+        </header>
+
+        <!-- STATS -->
+        <div class="stats-row" id="statsRow">
+            <div class="stat-card">
+                <div class="stat-number" id="statPlayers">0</div>
+                <div class="stat-label">Players</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="statTotalPoints">0</div>
+                <div class="stat-label">Total Pts</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="statLeader">—</div>
+                <div class="stat-label">Leader</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="statHighest">0</div>
+                <div class="stat-label">Highest</div>
+            </div>
+        </div>
+
+        <!-- ADD PLAYER -->
+        <div class="add-section">
+            <input type="text" id="playerNameInput" placeholder="Player name..." maxlength="30" autocomplete="off" />
+            <button class="btn-primary" id="addPlayerBtn">
+                <i class="fas fa-plus"></i> Add
+            </button>
+        </div>
+
+        <!-- PLAYER LIST -->
+        <div class="player-list" id="playerList">
+            <div class="empty-state">
+                <i class="fas fa-user-plus"></i>
+                <p>No players yet. Add one above!</p>
+            </div>
+        </div>
+
+        <!-- STANDINGS -->
+        <div class="standings-card">
+            <div class="card-header">
+                <h2><i class="fas fa-trophy"></i> Standings</h2>
+                <span class="badge" id="standingsBadge">Rank</span>
+            </div>
+            <div class="standings-wrap">
+                <table class="standings-table">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Player</th>
+                            <th>Pts</th>
+                        </tr>
+                    </thead>
+                    <tbody id="standingsBody">
+                        <tr><td colspan="3" class="no-data">No players yet.</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- TOAST -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <script>
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        //  DATABASE (IndexedDB)
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+        const DB_NAME = 'PoolRaceDB';
+        const DB_VERSION = 3;
+
+        let db = null;
+
+        function openDB() {
+            return new Promise((resolve, reject) => {
+                const req = indexedDB.open(DB_NAME, DB_VERSION);
+                req.onupgradeneeded = (e) => {
+                    const d = e.target.result;
+                    if (!d.objectStoreNames.contains('players')) {
+                        d.createObjectStore('players', { keyPath: 'id', autoIncrement: true });
+                    }
+                    if (!d.objectStoreNames.contains('settings')) {
+                        d.createObjectStore('settings', { keyPath: 'key' });
+                    }
+                    // remove matches if exists
+                    if (d.objectStoreNames.contains('matches')) {
+                        d.deleteObjectStore('matches');
+                    }
+                };
+                req.onsuccess = (e) => {
+                    db = e.target.result;
+                    resolve(db);
+                };
+                req.onerror = (e) => reject(e.target.error);
+            });
+        }
+
+        function dbAdd(store, data) {
+            return new Promise((resolve, reject) => {
+                const tx = db.transaction(store, 'readwrite');
+                const req = tx.objectStore(store).add(data);
+                req.onsuccess = () => resolve(req.result);
+                req.onerror = () => reject(req.error);
+            });
+        }
+        function dbPut(store, data) {
+            return new Promise((resolve, reject) => {
+                const tx = db.transaction(store, 'readwrite');
+                const req = tx.objectStore(store).put(data);
+                req.onsuccess = () => resolve(req.result);
+                req.onerror = () => reject(req.error);
+            });
+        }
+        function dbGetAll(store) {
+            return new Promise((resolve, reject) => {
+                const tx = db.transaction(store, 'readonly');
+                const req = tx.objectStore(store).getAll();
+                req.onsuccess = () => resolve(req.result);
+                req.onerror = () => reject(req.error);
+            });
+        }
+        function dbDelete(store, id) {
+            return new Promise((resolve, reject) => {
+                const tx = db.transaction(store, 'readwrite');
+                const req = tx.objectStore(store).delete(id);
+                req.onsuccess = () => resolve();
+                req.onerror = () => reject(req.error);
+            });
+        }
+
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        //  STATE
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+        let players = [];
+
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        //  DOM REFS
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+        const $ = (s) => document.querySelector(s);
+        const $$ = (s) => document.querySelectorAll(s);
+
+        const playerListEl = $('#playerList');
+        const nameInput = $('#playerNameInput');
+        const addBtn = $('#addPlayerBtn');
+        const standingsBody = $('#standingsBody');
+        const resetBtn = $('#resetBtn');
+
+        const statPlayers = $('#statPlayers');
+        const statTotal = $('#statTotalPoints');
+        const statLeader = $('#statLeader');
+        const statHighest = $('#statHighest');
+
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        //  TOAST
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+        function toast(msg, type = 'success') {
+            const c = $('#toastContainer');
+            const el = document.createElement('div');
+            el.className = `toast ${type}`;
+            const icon = type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle';
+            el.innerHTML = `<i class="fas ${icon}"></i> ${msg}`;
+            c.appendChild(el);
+            setTimeout(() => {
+                el.style.opacity = '0';
+                el.style.transform = 'translateY(20px)';
+                setTimeout(() => el.remove(), 350);
+            }, 2600);
+        }
+
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        //  RENDER
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+        function renderPlayers() {
+            if (!players.length) {
+                playerListEl.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-user-plus"></i>
+                        <p>No players yet. Add one above!</p>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = '';
+            players.forEach((p) => {
+                const init = (p.name.charAt(0) || '?').toUpperCase();
+                const score = p.score ?? 0;
+                const scoreClass = score < 0 ? 'pscore negative' : 'pscore';
+
+                // Build button groups: +2..+7, +10, -2..-7, -10
+                let inc = '';
+                let dec = '';
+                for (let i = 2; i <= 7; i++) {
+                    inc += `<button class="inc" data-id="${p.id}" data-d="${i}">+${i}</button>`;
+                }
+                inc += `<button class="inc big" data-id="${p.id}" data-d="10">+10</button>`;
+                for (let i = 2; i <= 7; i++) {
+                    dec += `<button class="dec" data-id="${p.id}" data-d="${-i}">-${i}</button>`;
+                }
+                dec += `<button class="dec big" data-id="${p.id}" data-d="${-10}">-10</button>`;
+
+                html += `
+                    <div class="player-card" data-id="${p.id}">
+                        <div class="top-row">
+                            <div class="name-wrap">
+                                <span class="avatar">${init}</span>
+                                <span class="pname">${escapeHtml(p.name)}</span>
+                            </div>
+                            <span class="${scoreClass}">${score}</span>
+                            <button class="btn-del" data-id="${p.id}" title="Remove">
+                                <i class="fas fa-trash-can"></i>
+                            </button>
+                        </div>
+                        <div class="btn-row">
+                            <span class="label">+</span>
+                            ${inc}
+                            <span class="label" style="margin-left:6px;">−</span>
+                            ${dec}
+                        </div>
+                    </div>
+                `;
+            });
+            playerListEl.innerHTML = html;
+
+            // Event: score adjust
+            playerListEl.querySelectorAll('.inc, .dec').forEach((btn) => {
+                btn.addEventListener('click', () => {
+                    const id = Number(btn.dataset.id);
+                    const delta = Number(btn.dataset.d);
+                    adjustScore(id, delta);
+                });
+            });
+
+            // Event: delete
+            playerListEl.querySelectorAll('.btn-del').forEach((btn) => {
+                btn.addEventListener('click', () => {
+                    deletePlayer(Number(btn.dataset.id));
+                });
+            });
+        }
+
+        function renderStandings() {
+            if (!players.length) {
+                standingsBody.innerHTML = `<tr><td colspan="3" class="no-data">No players yet.</td></tr>`;
+                return;
+            }
+            const sorted = [...players].sort((a, b) => (b.score ?? 0) - (a.score ?? 0));
+            let html = '';
+            sorted.forEach((p, i) => {
+                const s = p.score ?? 0;
+                const cls = s < 0 ? 'pscore negative' : 'pscore';
+                html += `
+                    <tr>
+                        <td class="rank">${i + 1}</td>
+                        <td class="pname">${escapeHtml(p.name)}</td>
+                        <td class="${cls}">${s}</td>
+                    </tr>
+                `;
+            });
+            standingsBody.innerHTML = html;
+        }
+
+        function renderStats() {
+            const count = players.length;
+            statPlayers.textContent = count;
+
+            let total = 0,
+                high = 0,
+                leader = '—';
+            players.forEach((p) => {
+                const s = p.score ?? 0;
+                total += s;
+                if (s > high) {
+                    high = s;
+                    leader = p.name;
+                }
+            });
+            statTotal.textContent = total;
+            statHighest.textContent = high;
+            statLeader.textContent = leader;
+        }
+
+        function renderAll() {
+            renderPlayers();
+            renderStandings();
+            renderStats();
+        }
+
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        //  HELPERS
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+        function escapeHtml(t) {
+            const d = document.createElement('div');
+            d.textContent = t;
+            return d.innerHTML;
+        }
+
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        //  CRUD
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+        async function addPlayer(name) {
+            name = name.trim();
+            if (!name) { toast('Please enter a name.', 'error'); return; }
+            if (players.some(p => p.name.toLowerCase() === name.toLowerCase())) {
+                toast('Player already exists.', 'error');
+                return;
+            }
+            try {
+                const data = { name, score: 0 };
+                const id = await dbAdd('players', data);
+                data.id = id;
+                players.push(data);
+                renderAll();
+                toast(`Added "${name}"`);
+                nameInput.value = '';
+                nameInput.focus();
+            } catch (e) {
+                toast('Error adding player.', 'error');
+                console.error(e);
+            }
+        }
+
+        async function deletePlayer(id) {
+            const p = players.find(p => p.id === id);
+            if (!p) return;
+            if (!confirm(`Remove "${p.name}"?`)) return;
+            try {
+                await dbDelete('players', id);
+                players = players.filter(p => p.id !== id);
+                renderAll();
+                toast(`Removed "${p.name}"`);
+            } catch (e) {
+                toast('Error removing player.', 'error');
+                console.error(e);
+            }
+        }
+
+        async function adjustScore(id, delta) {
+            const p = players.find(p => p.id === id);
+            if (!p) return;
+            // No restriction — negative allowed
+            const newScore = (p.score ?? 0) + delta;
+            p.score = newScore;
+            try {
+                await dbPut('players', p);
+                renderAll();
+                // Optional: show toast for big moves
+                // toast(`${p.name}: ${delta > 0 ? '+' : ''}${delta} → ${newScore}`);
+            } catch (e) {
+                toast('Error updating score.', 'error');
+                console.error(e);
+            }
+        }
+
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        //  RESET
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+        async function resetAll() {
+            if (!confirm('⚠️ Delete ALL players and scores?')) return;
+            try {
+                for (const p of players) {
+                    await dbDelete('players', p.id);
+                }
+                players = [];
+                renderAll();
+                toast('All data cleared.');
+            } catch (e) {
+                toast('Error resetting.', 'error');
+                console.error(e);
+            }
+        }
+
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        //  LOAD
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+        async function loadData() {
+            try {
+                players = await dbGetAll('players');
+                players.forEach(p => {
+                    if (p.score === undefined) p.score = 0;
+                });
+                renderAll();
+            } catch (e) {
+                console.error('Load error:', e);
+                toast('Error loading data.', 'error');
+            }
+        }
+
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        //  INIT
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+        function init() {
+            addBtn.addEventListener('click', () => {
+                addPlayer(nameInput.value);
+            });
+            nameInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    addPlayer(nameInput.value);
+                }
+            });
+            resetBtn.addEventListener('click', resetAll);
+            loadData();
+        }
+
+        openDB().then(() => {
+            init();
+        }).catch((err) => {
+            console.error('DB error:', err);
+            alert('⚠️ Database failed to open. Please try a different browser.');
+        });
+    </script>
+</body>
+</html>
